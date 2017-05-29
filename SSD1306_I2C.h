@@ -1,3 +1,5 @@
+/* !!!!!!!!!!!!! INCOMPLETE - WORK IN PROGRESS !!!!!!!!!!!!! */
+
 /****************************************************************
 * SSD1306 BASED OLED MODULE (128 x 64)
 * I2C MODE
@@ -5,6 +7,11 @@
 * NOTE: THE OLED CONTROLLER SUPPORTS BOTH I2C AND SPI, BUT THE
 * 		MODULES BOUGHT USUALLY HARDWIRE TO SELECT A PARTICULAR
 * 		MODE
+*
+* 		THE ORIGINAL ADAFRUIT ONES USE THE SSD1306 CONTROLLER,
+* 		BUT THE CHEAPER ONES BOUGHT FROM ALIEXPRESS N ALL USE
+* 		THE CHEAPER SH1306 CONTROLLER, WHICH IS SIMILAR BUT
+* 		NOT EXACTLY THE SAME TO THIS ONE !
 *
 * MAY 26 2017
 *
@@ -17,9 +24,78 @@
 *   (2)	http://robotcantalk.blogspot.in/2015/03/interfacing-arduino-with-ssd1306-driven_9.html
 ****************************************************************/
 
-#ifndef _SSD1306_I2C_
-#define _SSD1306_I2C_
+#ifndef _SSD1306_I2C_H_
+#define _SSD1306_I2C_H_
 
+#ifdef ESP8266
+	#include "ets_sys.h"
+	#include "osapi.h"
+	#include "gpio.h"
+	#include "os_type.h"
 
+	#define PUT_FUNCTION_IN_FLASH 				ICACHE_FLASH_ATTR
+	#define _ssd1306_i2c_backend_init			ESP8266_I2C_Init
+	#define	 _ssd1306_i2c_send_start_function	ESP8266_I2C_SendStart
+	#define _ssd1306_i2c_send_stop_function		ESP8266_I2C_SendStop
+	#define _ssd1306_i2c_send_byte_function		ESP8266_I2C_SendByte
+	#define debug_printf 						os_printf
+#else
+	#define PUT_FUNCTION_IN_FLASH
+#endif
 
+//I2C ADDRESS
+#define SSD1306_I2C_ADDRESS_1					0x3C
+#define SSD1306_I2C_ADDRESS_2					0x3D
+
+//SCREEN PIXEL SIZE
+#define SSD1306_I2C_OLED_MAX_COLUMN				127
+#define SSD1306_I2C_OLED_MAX_PAGE				7
+
+//CONTROL BYTES
+#define SSD1306_I2C_CONTROL_BYTE_CMD_SINGLE		0x80
+#define SSD1306_I2C_CONTROL_BYTE_CMD_STREAM		0x00
+#define SSD1306_I2C_CONTROL_BYTE_DATA_SINGLE	0xC0
+#define SSD1306_I2C_CONTROL_BYTE_DATA_STREAM	0x40
+
+//FUNDAMENTAL COMMANDS (DATASHEET PG 29)
+#define SSD1306_I2C_CMD_SET_CONTRAST			0x81
+#define SSD1306_I2C_CMD_DISPLAY_RAM				0xA4
+#define SSD1306_I2C_CMD_DISPLAY_ALLON			0xA5
+#define SSD1306_I2C_CMD_DISPLAY_NORMAL			0xA6
+#define SSD1306_I2C_CMD_DISPLAY_INVERTED		0xA7
+#define SSD1306_I2C_CMD_DISPLAY_OFF				0xAE
+#define SSD1306_I2C_CMD_DISPLAY_ON				0xAF
+
+//ADDRESSING COMMANDS
+#define SSD1306_I2C_CMD_SET_MEMORY_ADD_MODE		0x20
+#define SSD1306_I2C_CMD_SET_COLUMN_RANGE		0x21
+#define SSD1306_I2C_CMD_SET_PAGE_RANGE			0x22
+
+//HARDWARE CONFIGURATION COMMANDS
+#define SSD1306_I2C_CMD_SET_DISPLAY_START_LINE	0x40
+#define SSD1306_I2C_CMD_SET_SEGMENT_REMAP		0xA0
+#define SSD1306_I2C_CMD_SET_MUX_RATIO			0xA8
+#define SSD1306_I2C_CMD_SET_COM_SCAN_MODE		0xC0
+#define SSD1306_I2C_CMD_SET_DISPLAY_OFFSET		0xD3
+#define SSD1306_I2C_CMD_SET_COM_PIN_MAP			0xDA
+#define SSD1306_I2C_CMD_NOP						0xE3
+
+//TIMING & DRIVING COMMANDS
+#define SSD1306_I2C_CMD_SET_DISPLAY_CLK_DIV		0xD5
+#define SSD1306_I2C_CMD_SET_PRECHARGE			0xD9
+#define SSD1306_I2C_CMD_SET_VCOMH_DESELECT		0xD8
+#define SSD1306_I2C_CMD_SET_CHARGE_PUMP			0x8D
+
+//FUNCTION PROTOTYPES/////////////////////////////////////
+//CONFIGURATION FUNCTIONS
+void PUT_FUNCTION_IN_FLASH SSD1306_I2C_SetDebug(uint8_t debug_on);
+void PUT_FUNCTION_IN_FLASH SSD1306_I2C_SetDeviceAddress(uint8_t address);
+void PUT_FUNCTION_IN_FLASH SSD1306_I2C_Init(void);
+
+//CONTROL FUNCTIONS
+void PUT_FUNCTION_IN_FLASH SSD1306_I2C_SetContrast(uint8_t contrast_val);
+void PUT_FUNCTION_IN_FLASH SSD1306_I2C_ResetAndClearScreen(uint8_t screen_fill);
+
+//INTERNAL FUNCTIOMS
+//END FUNCTION PROTOTYPES/////////////////////////////////
 #endif
